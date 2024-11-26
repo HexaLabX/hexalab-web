@@ -1,0 +1,178 @@
+import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import ThemeContext from "../context/ThemeContext";
+
+const Signup = () => {
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [gender, setGender] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [suggestedEmails, setSuggestedEmails] = useState([]);
+  const { darkMode } = useContext(ThemeContext);
+  const navigate = useNavigate();
+
+  const emailDomains = ["@gmail.com", "@yahoo.com", "@outlook.com", "@hotmail.com"];
+
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+
+    if (value.includes("@")) {
+      setSuggestedEmails([]);
+    } else {
+      const suggestions = emailDomains.map((domain) => value + domain);
+      setSuggestedEmails(suggestions);
+    }
+  };
+
+  const handleEmailSuggestionClick = (suggestion) => {
+    setEmail(suggestion);
+    setSuggestedEmails([]);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!username || !gender) {
+      setError("Please fill in all fields");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    if (users.find((user) => user.email === email)) {
+      setError("Email is already registered");
+      return;
+    }
+
+    const newUser = {
+      email,
+      username,
+      gender,
+      password,
+      role: "user",
+      lastLogin: null,
+      creationTime: new Date().toLocaleString(), // Tambahkan kapan akun dibuat
+    };
+
+    users.push(newUser);
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("user", JSON.stringify(newUser));
+
+    alert("Signup successful");
+    navigate("/login");
+  };
+
+  return (
+    <div
+      className={`min-h-screen flex items-center justify-center ${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-800"
+      }`}
+    >
+      <div
+        className={`shadow-lg rounded-lg p-8 max-w-sm w-full ${
+          darkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"
+        }`}
+      >
+        <h2
+          className={`text-2xl font-semibold text-center mb-6 ${
+            darkMode ? "text-white" : "text-blue-600"
+          }`}
+        >
+          Create Your Account
+        </h2>
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium">
+              Username
+            </label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="w-full p-2 rounded border"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={handleEmailChange}
+              required
+              className="w-full p-2 rounded border"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium">
+              Password
+            </label>
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full p-2 rounded border"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium">
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className="w-full p-2 rounded border"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="gender" className="block text-sm font-medium">
+              Gender
+            </label>
+            <select
+              id="gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              required
+              className="w-full p-2 rounded border"
+            >
+              <option value="" disabled>
+                Select Gender
+              </option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <button type="submit" className="w-full p-2 rounded bg-blue-500 text-white">
+            Sign Up
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Signup;

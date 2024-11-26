@@ -1,0 +1,104 @@
+import { Link, useLocation } from "react-router-dom";
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
+import ThemeContext from "../context/ThemeContext";
+
+const Navbar = () => {
+  const { user, logout } = useContext(AuthContext); // Tambahkan logout jika diperlukan
+  const { darkMode, setDarkMode } = useContext(ThemeContext);
+  const location = useLocation();
+
+  // Logika halaman saat ini
+  const isLoginPage = location.pathname === "/login";
+  const isSignupPage = location.pathname === "/signup";
+
+  return (
+    <nav
+      className={`shadow-lg sticky top-0 z-10 ${
+        darkMode ? "bg-gray-800 text-white" : "bg-blue-600 text-white"
+      }`}
+    >
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        {/* Brand */}
+        <h1 className="text-2xl font-bold flex items-center space-x-2">
+          <Link to="/" className="hover:text-gray-300">
+            HexaLab
+          </Link>
+        </h1>
+
+        {/* Navigation Links */}
+        <ul className="flex space-x-6 items-center">
+          {!user && isLoginPage && (
+            <li>
+              <Link to="/signup" className="flex items-center space-x-2 hover:text-gray-300">
+                <span className="material-icons">person_add</span>
+                <span>Signup</span>
+              </Link>
+            </li>
+          )}
+          {!user && isSignupPage && (
+            <li>
+              <Link to="/login" className="flex items-center space-x-2 hover:text-gray-300">
+                <span className="material-icons">login</span>
+                <span>Login</span>
+              </Link>
+            </li>
+          )}
+          {user && (
+            <>
+              <li>
+                <Link to="/" className="flex items-center space-x-2 hover:text-gray-300">
+                  <span className="material-icons">home</span>
+                  <span>Home</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/videos" className="flex items-center space-x-2 hover:text-gray-300">
+                  <span className="material-icons">video_library</span>
+                  <span>Videos</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/profile" className="flex items-center space-x-2 hover:text-gray-300">
+                  <span className="material-icons">person</span>
+                  <span>Profile</span>
+                </Link>
+              </li>
+              {user.role === "admin" && (
+                <li>
+                  <Link to="/admin" className="flex items-center space-x-2 hover:text-gray-300">
+                    <span className="material-icons">admin_panel_settings</span>
+                    <span>Admin</span>
+                  </Link>
+                </li>
+              )}
+              {/* Tombol Logout */}
+              <li>
+                <button
+                  onClick={logout}
+                  className="flex items-center space-x-2 hover:text-red-500 transition"
+                >
+                  <span className="material-icons">logout</span>
+                  <span>Logout</span>
+                </button>
+              </li>
+              {/* Toggle Dark Mode */}
+              <li>
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="flex items-center space-x-2 hover:text-gray-300 transition"
+                >
+                  <span className="material-icons">
+                    {darkMode ? "light_mode" : "dark_mode"}
+                  </span>
+                </button>
+              </li>
+            </>
+          )}
+        </ul>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
